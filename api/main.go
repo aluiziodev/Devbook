@@ -1,16 +1,19 @@
 package main
 
 import (
+	"apiDevbook/src/config"
 	"apiDevbook/src/router"
+	"fmt"
 	"log"
 	"net/http"
 )
 
 func main() {
-	log.Println("Iniciando a API!!")
+
+	config.Carregar()
 
 	r := router.Gerar()
-
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Printf("Iniciando a API na porta: %s", config.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", config.Port), r))
 
 }
