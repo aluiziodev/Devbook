@@ -3,6 +3,7 @@ package repositorios
 import (
 	"apiDevbook/src/models"
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -69,4 +70,34 @@ func (repo Usuarios) Buscar(nickOrName string) ([]models.Usuario, error) {
 
 	return usuarios, nil
 
+}
+
+func (repo Usuarios) BuscarId(id uint64) (models.Usuario, error) {
+	query, err := repo.db.Query(
+		"select id, nome, nick, email, data_inicio from usuarios where id=?",
+		id)
+	if err != nil {
+		return models.Usuario{}, err
+	}
+	defer query.Close()
+
+	var usuario models.Usuario
+	if query.Next() {
+		if err = query.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.DataInicio,
+		); err != nil {
+			return models.Usuario{}, err
+		}
+
+	}
+
+	if usuario.Nome == "" {
+		return models.Usuario{}, errors.New("Usuario nao existe na base de dados")
+	}
+
+	return usuario, nil
 }
