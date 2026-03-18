@@ -3,7 +3,7 @@ package repositorios
 import (
 	"apiDevbook/src/models"
 	"database/sql"
-	"log"
+	"fmt"
 )
 
 type Usuarios struct {
@@ -20,7 +20,7 @@ func (repo Usuarios) Criar(usuario models.Usuario) (uint64, error) {
 		"insert into usuarios (nome, nick, email, senha) values (?, ?, ?, ?)",
 	)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 	defer statement.Close()
 
@@ -29,5 +29,44 @@ func (repo Usuarios) Criar(usuario models.Usuario) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	ultIdInserido, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return uint64(ultIdInserido), nil
+
+}
+
+func (repo Usuarios) Buscar(nickOrName string) ([]models.Usuario, error) {
+	nickOrName = fmt.Sprintf("%%%s%%", nickOrName)
+
+	query, err := repo.db.Query(
+		"select id, nome, nick, email, data_inicio from usuarios where nome like ? or nick like ?",
+		nickOrName, nickOrName)
+	if err != nil {
+		return nil, err
+	}
+	defer query.Close()
+
+	var usuarios []models.Usuario
+
+	for query.Next() {
+		var usuario models.Usuario
+		if err = query.Scan(
+			&usuario.Id,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.DataInicio,
+		); err != nil {
+			return nil, err
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, nil
 
 }
