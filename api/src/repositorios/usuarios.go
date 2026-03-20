@@ -151,3 +151,75 @@ func (repo Usuarios) BuscarEmail(email string) (models.Usuario, error) {
 
 	return usuario, nil
 }
+
+func (repo Usuarios) Seguir(idSeguir, idSeguidor uint64) error {
+	statement, err := repo.db.Prepare(
+		"insert ignore into seguidores (usuario_id, seguidor_id) values (?, ?)")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(idSeguir, idSeguidor); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo Usuarios) DeixarSeguir(idSeguir, idSeguidor uint64) error {
+	statement, err := repo.db.Prepare(
+		"delete from seguidores where usuario_id = ? and seguidor_id = ?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(idSeguir, idSeguidor); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo Usuarios) BuscarSeguidores(id uint64) ([]models.Usuario, error) {
+	query, err := repo.db.Query(`
+		select u.id, u.nome, u.nick, u.email, u.data_inicio 
+		from usuarios as u join seguidores as s on u.id = s.seguidor_id
+		where s.usuario_id = ?
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	var seguidores []models.Usuario
+
+	for query.Next() {
+		var seguidor models.Usuario
+		if err = query.Scan(&seguidor.Id, &seguidor.Nome, &seguidor.Nick, &seguidor.Email, &seguidor.DataInicio); err != nil {
+			return nil, err
+		}
+		seguidores = append(seguidores, seguidor)
+	}
+	return seguidores, nil
+}
+
+func (repo Usuarios) BuscarSeguindo(id uint64) ([]models.Usuario, error) {
+	query, err := repo.db.Query(`
+		select u.id, u.nome, u.nick, u.email, u.data_inicio 
+		from usuarios as u join seguidores as s on u.id = s.usuario_id
+		where s.seguidor_id = ?
+	`, id)
+	if err != nil {
+		return nil, err
+	}
+	var seguidores []models.Usuario
+
+	for query.Next() {
+		var seguidor models.Usuario
+		if err = query.Scan(&seguidor.Id, &seguidor.Nome, &seguidor.Nick, &seguidor.Email, &seguidor.DataInicio); err != nil {
+			return nil, err
+		}
+		seguidores = append(seguidores, seguidor)
+	}
+	return seguidores, nil
+}

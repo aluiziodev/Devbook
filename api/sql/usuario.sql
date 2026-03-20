@@ -10,7 +10,21 @@ create table usuarios(
     email varchar(50) not null unique,
     senha varchar(50) not null unique,
     data_inicio timestamp default current_timestamp()
-) engine=InnoDB;
+)engine=InnoDB;
 
+drop table if exists seguidores;
+
+create table seguidores(
+	usuario_id int not null, 
+    foreign key (usuario_id) references usuarios(id)
+    on delete cascade,
+    
+    seguidor_id int not null,
+    foreign key (seguidor_id) references usuarios(id)
+    on delete cascade,
+    
+    primary key(usuario_id, seguidor_id)
+    
+)engine=InnoDB;
 
 

@@ -4,7 +4,7 @@ import (
 	"apiDevbook/src/authentication"
 	"apiDevbook/src/database"
 	"apiDevbook/src/models"
-	"apiDevbook/src/models/repositorios"
+	"apiDevbook/src/repositorios"
 	"apiDevbook/src/respostas"
 	"apiDevbook/src/security"
 	"encoding/json"
