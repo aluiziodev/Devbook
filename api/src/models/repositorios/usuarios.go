@@ -101,3 +101,53 @@ func (repo Usuarios) BuscarId(id uint64) (models.Usuario, error) {
 
 	return usuario, nil
 }
+
+func (repo Usuarios) Atualizar(id uint64, usuario models.Usuario) error {
+	statement, err := repo.db.Prepare(
+		"update usuarios set nome = ?, nick = ?, email = ? where id = ?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(usuario.Nome, usuario.Nick, usuario.Email, id); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (repo Usuarios) Deletar(id uint64) error {
+	statement, err := repo.db.Prepare(
+		"delete from usuarios where id = ?")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(id); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (repo Usuarios) BuscarEmail(email string) (models.Usuario, error) {
+	query, err := repo.db.Query("select id, senha from usuarios where email = ?", email)
+	if err != nil {
+		return models.Usuario{}, err
+	}
+	defer query.Close()
+
+	var usuario models.Usuario
+
+	if query.Next() {
+		if err = query.Scan(&usuario.Id, &usuario.Password); err != nil {
+			return models.Usuario{}, err
+		}
+	}
+
+	return usuario, nil
+}

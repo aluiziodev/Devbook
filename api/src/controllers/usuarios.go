@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"apiDevbook/src/authentication"
 	"apiDevbook/src/database"
 	"apiDevbook/src/models"
 	"apiDevbook/src/models/repositorios"
 	"apiDevbook/src/respostas"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -28,7 +30,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = usuario.Preparar(); err != nil {
+	if err = usuario.Preparar("cadastro"); err != nil {
 		respostas.Erro(w, http.StatusBadRequest, err)
 		return
 	}
@@ -99,10 +101,78 @@ func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
 
 // AtualizarUsuario faz um update em um usuario especifico no DB
 func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	id, err := strconv.ParseUint(parametros["id"], 10, 64)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	userIdToken, err := authentication.ExtrairUserId(r)
+	if err != nil {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userIdToken != id {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Nao 'e possivel atualizar este usuario!!"))
+		return
+	}
+
+	bodyReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		respostas.Erro(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var usuario models.Usuario
+	if err = json.Unmarshal(bodyReq, &usuario); err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = usuario.Preparar("atualizar"); err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Conectar()
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepoUsuarios(db)
+	if err = repositorio.Atualizar(id, usuario); err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 
 }
 
 // DeletarUsuario faz o delete de um usuario especifico no DB
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	id, err := strconv.ParseUint(parametros["id"], 10, 64)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+	db, err := database.Conectar()
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
 
+	repositorio := repositorios.NovoRepoUsuarios(db)
+	if err = repositorio.Deletar(id); err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 }
