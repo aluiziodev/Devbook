@@ -6,6 +6,7 @@ import (
 	"apiDevbook/src/models"
 	"apiDevbook/src/repositorios"
 	"apiDevbook/src/respostas"
+	"apiDevbook/src/security"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -350,5 +351,31 @@ func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+
+	repositorio := repositorios.NovoRepoUsuarios(db)
+	senhaSalvaBanco, err := repositorio.BuscarSenha(userId)
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = security.VerificarSenha(senhaSalvaBanco, senha.Atual); err != nil {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	senhaWhash, err := security.Hash(senha.Nova)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = repositorio.AtualizarSenha(userId, string(senhaWhash))
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 
 }

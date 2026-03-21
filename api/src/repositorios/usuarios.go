@@ -222,4 +222,39 @@ func (repo Usuarios) BuscarSeguindo(id uint64) ([]models.Usuario, error) {
 		seguidores = append(seguidores, seguidor)
 	}
 	return seguidores, nil
+
+}
+
+func (repo Usuarios) BuscarSenha(id uint64) (string, error) {
+	query, err := repo.db.Query(`select senha from usuarios where id = ?`, id)
+	if err != nil {
+		return "", err
+	}
+	defer query.Close()
+
+	var usuario models.Usuario
+
+	if query.Next() {
+		if err := query.Scan(&usuario.Password); err != nil {
+			return "", err
+
+		}
+	}
+
+	return usuario.Password, nil
+}
+
+func (repo Usuarios) AtualizarSenha(id uint64, senha string) error {
+	statement, err := repo.db.Prepare(`update usuarios set senha = ? where id = ?`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err := statement.Exec(senha, id); err != nil {
+		return err
+	}
+
+	return nil
+
 }
