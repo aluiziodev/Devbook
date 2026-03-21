@@ -8,7 +8,7 @@ create table usuarios(
     nome varchar(50) not null,
     nick varchar(50) not null unique,
     email varchar(50) not null unique,
-    senha varchar(50) not null unique,
+    senha varchar(150) not null unique,
     data_inicio timestamp default current_timestamp()
 )engine=InnoDB;
 

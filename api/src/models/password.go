@@ -1,6 +1,6 @@
 package models
 
 type Password struct {
-	Nova  string `json:"new"`
-	Atual string `json:"old"`
+	Nova  string `json:"nova"`
+	Atual string `json:"atual"`
 }
