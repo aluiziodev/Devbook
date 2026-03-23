@@ -128,3 +128,71 @@ func (repo Publicacoes) Deletar(publicacaoId uint64) error {
 
 	return nil
 }
+
+func (repo Publicacoes) BuscarPublicacoesUsuario(userId uint64) ([]models.Publicacao, error) {
+	query, err := repo.db.Query(`
+		select p.*, u.nick 
+		from publicacoes p join usuarios u on p.autor_id = u.id
+		where p.autor_id = ?
+	`, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer query.Close()
+
+	var publicacoes []models.Publicacao
+
+	for query.Next() {
+		var publicacao models.Publicacao
+		if err := query.Scan(&publicacao.Id,
+			&publicacao.Titulo,
+			&publicacao.Conteudo,
+			&publicacao.AutorId,
+			&publicacao.Curtidas,
+			&publicacao.DataCriacao,
+			&publicacao.AutorNick); err != nil {
+			return nil, err
+		}
+		publicacoes = append(publicacoes, publicacao)
+	}
+
+	return publicacoes, nil
+}
+
+func (repo Publicacoes) Curtir(publicacaoId uint64) error {
+	statement, err := repo.db.Prepare(`
+		update publicacoes set curtidas = curtidas + 1 where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(&publicacaoId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo Publicacoes) Descurtir(publicacaoId uint64) error {
+	statement, err := repo.db.Prepare(`
+		update publicacoes set curtidas = 
+		CASE WHEN curtidas > 0 
+			THEN curtidas - 1
+		ELSE 
+			0 
+		END		
+		where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(&publicacaoId); err != nil {
+		return err
+	}
+
+	return nil
+}

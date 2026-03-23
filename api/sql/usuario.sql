@@ -27,4 +27,19 @@ create table seguidores(
     
 )engine=InnoDB;
 
+CREATE TABLE publicacoes (
+    id int auto_increment primary key,
+    titulo varchar(50) not null,
+    conteudo varchar(300) not null,
+
+
+    autor_id not null, foreign key (autor_id) 
+    references usuarios(id) on delete cascade,
+
+
+    curtidas int default 0,
+    data_criacao timestamp default current_timestamp
+
+)engine=InnoDB;
+
 
