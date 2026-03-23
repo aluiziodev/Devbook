@@ -7,33 +7,33 @@ A **Devbook API** é o motor por trás de uma rede social para desenvolvedores, 
 Abaixo estão detalhadas as rotas disponíveis, organizadas por módulo.
 
 ### 🔐 Autenticação
-*   **POST `/login`**: Permite a autenticação de usuários no sistema [1].
+*   **POST `/login`**: Permite a autenticação de usuários no sistema.
 
 ### 👤 Usuários
 | Método | Rota | Descrição | Requer Auth |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/usuarios` | Realiza o cadastro de um novo usuário [2]. | Não |
-| **GET** | `/usuarios` | Busca usuários cadastrados no sistema [2]. | Sim |
-| **GET** | `/usuarios/{id}` | Retorna as informações de um usuário específico [2]. | Sim |
-| **PUT** | `/usuarios/{id}` | Atualiza os dados de um usuário [2]. | Sim |
-| **DELETE** | `/usuarios/{id}` | Remove permanentemente a conta de um usuário [3]. | Sim |
-| **POST** | `/usuarios/{id}/seguir` | Permite seguir outro usuário da rede [3]. | Sim |
-| **POST** | `/usuarios/{id}/parar-seguir` | Permite deixar de seguir um usuário [3]. | Sim |
-| **GET** | `/usuarios/{id}/seguidores` | Lista todos os seguidores de um usuário [3]. | Sim |
-| **GET** | `/usuarios/{id}/seguindo` | Lista quem o usuário está seguindo [3, 4]. | Sim |
-| **POST** | `/usuarios/{id}/atualizar-senha` | Permite que o usuário altere sua senha de acesso [4]. | Sim |
+| **POST** | `/usuarios` | Realiza o cadastro de um novo usuário. | Não |
+| **GET** | `/usuarios` | Busca usuários cadastrados no sistema. | Sim |
+| **GET** | `/usuarios/{id}` | Retorna as informações de um usuário específico. | Sim |
+| **PUT** | `/usuarios/{id}` | Atualiza os dados de um usuário. | Sim |
+| **DELETE** | `/usuarios/{id}` | Remove permanentemente a conta de um usuário. | Sim |
+| **POST** | `/usuarios/{id}/seguir` | Permite seguir outro usuário da rede. | Sim |
+| **POST** | `/usuarios/{id}/parar-seguir` | Permite deixar de seguir um usuário. | Sim |
+| **GET** | `/usuarios/{id}/seguidores` | Lista todos os seguidores de um usuário. | Sim |
+| **GET** | `/usuarios/{id}/seguindo` | Lista quem o usuário está seguindo. | Sim |
+| **POST** | `/usuarios/{id}/atualizar-senha` | Permite que o usuário altere sua senha de acesso. | Sim |
 
 ### 📝 Publicações
 | Método | Rota | Descrição | Requer Auth |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/publicacoes` | Cria uma nova publicação no feed [5]. | Sim |
-| **GET** | `/publicacoes` | Retorna as publicações do feed (próprias e de quem segue) [5]. | Sim |
-| **GET** | `/publicacoes/{publicacaoId}` | Busca uma publicação específica por seu ID [5]. | Sim |
-| **PUT** | `/publicacoes/{publicacaoId}` | Edita o conteúdo de uma publicação existente [5, 6]. | Sim |
-| **DELETE** | `/publicacoes/{publicacaoId}` | Remove uma publicação do sistema [6]. | Sim |
-| **GET** | `/usuarios/{usuarioId}/publicacoes` | Lista todas as publicações de um usuário específico [6]. | Sim |
-| **POST** | `/publicacoes/{publicacaoId}/curtir` | Adiciona uma curtida a uma publicação [6]. | Sim |
-| **DELETE** | `/publicacoes/{publicacaoId}/curtir` | Remove a curtida de uma publicação [6, 7]. | Sim |
+| **POST** | `/publicacoes` | Cria uma nova publicação no feed. | Sim |
+| **GET** | `/publicacoes` | Retorna as publicações do feed (próprias e de quem segue). | Sim |
+| **GET** | `/publicacoes/{publicacaoId}` | Busca uma publicação específica por seu ID. | Sim |
+| **PUT** | `/publicacoes/{publicacaoId}` | Edita o conteúdo de uma publicação existente. | Sim |
+| **DELETE** | `/publicacoes/{publicacaoId}` | Remove uma publicação do sistema. | Sim |
+| **GET** | `/usuarios/{usuarioId}/publicacoes` | Lista todas as publicações de um usuário específico. | Sim |
+| **POST** | `/publicacoes/{publicacaoId}/curtir` | Adiciona uma curtida a uma publicação. | Sim |
+| **DELETE** | `/publicacoes/{publicacaoId}/curtir` | Remove a curtida de uma publicação. | Sim |
 
 ---
 
@@ -51,13 +51,8 @@ Crie um arquivo chamado `.env` na raiz do projeto e adicione as seguintes chaves
 DB_USER=seu_usuario_banco
 DB_PASSWORD=sua_senha_do_banco
 DB_NAME=nome_do_seu_banco
-PORT=5000
+PORT=5000 (ou outra qualquer)
 SECRET_KEY=uma_chave_segura_para_o_jwt
-DB_USER: Usuário do banco de dados MySQL.
-DB_PASSWORD: Senha do usuário do banco de dados.
-DB_NAME: Nome da base de dados utilizada.
-PORT: Porta onde a API será executada.
-SECRET_KEY: Chave utilizada para assinar os tokens JWT necessários para as rotas autenticadas
 ```
 
 ---
@@ -71,7 +66,7 @@ Para o funcionamento das rotas de usuários, publicações e login, execute os s
 ### Instalação dos drivers e utilitários
 ```bash
 go get github.com/go-sql-driver/mysql          # Driver de conexão com MySQL
-go get github.com/gorilla/mux                   # Roteador HTTP [1-3]
+go get github.com/gorilla/mux                   # Roteador HTTP
 go get github.com/joho/godotenv                 # Gerenciamento de arquivo .env
 go get github.com/dgrijalva/jwt-go              # Implementação de tokens JWT
 go get golang.org/x/crypto/bcrypt               # Criptografia de senhas
