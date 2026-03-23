@@ -25,13 +25,13 @@ var rotasPublicacoes = []Rota{
 		RequerAuth: true,
 	},
 	{
-		Uri:        "/publicacoe/{publicacaoId}",
+		Uri:        "/publicacoes/{publicacaoId}",
 		Metodo:     http.MethodPut,
 		Funcao:     controllers.AtualizarPublicacao,
 		RequerAuth: true,
 	},
 	{
-		Uri:        "/publicacoes",
+		Uri:        "/publicacoes/{publicacaoId}",
 		Metodo:     http.MethodDelete,
 		Funcao:     controllers.DeletarPublicacao,
 		RequerAuth: true,

@@ -95,3 +95,36 @@ func (repo Publicacoes) Buscar(userId uint64) ([]models.Publicacao, error) {
 
 	return publicacoes, nil
 }
+
+func (repo Publicacoes) Atualizar(publicacaoId uint64, publicacao models.Publicacao) error {
+	statement, err := repo.db.Prepare(`
+		update publicacoes set titulo = ?, conteudo = ? where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(&publicacao.Titulo,
+		&publicacao.Conteudo, &publicacaoId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo Publicacoes) Deletar(publicacaoId uint64) error {
+	statement, err := repo.db.Prepare(`
+		delete from publicacoes where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(&publicacaoId); err != nil {
+		return err
+	}
+
+	return nil
+}

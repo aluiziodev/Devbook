@@ -82,7 +82,7 @@ func BuscarPublicacoes(w http.ResponseWriter, r *http.Request) {
 }
 func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 	parametros := mux.Vars(r)
-	PublicacaoId, err := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	publicacaoId, err := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
 	if err != nil {
 		respostas.Erro(w, http.StatusBadRequest, err)
 		return
@@ -96,7 +96,7 @@ func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	repositorio := repositorios.NovoRepoPublicacoes(db)
-	publicacoes, err := repositorio.BuscarId(PublicacaoId)
+	publicacoes, err := repositorio.BuscarId(publicacaoId)
 	if err != nil {
 		respostas.Erro(w, http.StatusInternalServerError, err)
 		return
@@ -106,8 +106,93 @@ func BuscarPublicacao(w http.ResponseWriter, r *http.Request) {
 
 }
 func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtrairUserId(r)
+	if err != nil {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	parametros := mux.Vars(r)
+	publicacaoId, err := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Conectar()
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepoPublicacoes(db)
+	publicacaoBanco, err := repositorio.BuscarId(publicacaoId)
+	if err != nil {
+		respostas.Erro(w, http.StatusForbidden, err)
+		return
+	}
+	if publicacaoBanco.AutorId != userId {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	bodyReq, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	var publicacao models.Publicacao
+	if err = json.Unmarshal(bodyReq, &publicacao); err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = repositorio.Atualizar(publicacaoId, publicacao); err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 
 }
 func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
+	userId, err := authentication.ExtrairUserId(r)
+	if err != nil {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
 
+	parametros := mux.Vars(r)
+	publicacaoId, err := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if err != nil {
+		respostas.Erro(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Conectar()
+	if err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepoPublicacoes(db)
+	publicacaoBanco, err := repositorio.BuscarId(publicacaoId)
+	if err != nil {
+		respostas.Erro(w, http.StatusForbidden, err)
+		return
+	}
+	if publicacaoBanco.AutorId != userId {
+		respostas.Erro(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	if err = repositorio.Deletar(publicacaoId); err != nil {
+		respostas.Erro(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 }
